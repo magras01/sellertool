@@ -53,7 +53,7 @@ export default async function AppPage() {
         <AccessBanner access={access} />
 
         {access.hasAccess ? (
-          <PricingCalculator />
+          <PricingCalculator isPaid={access.status === 'active'} />
         ) : (
           <div className="mt-8 bg-white rounded-xl border border-gray-200 p-12 text-center">
             <h2 className="text-xl font-semibold text-gray-900 mb-2">Access Required</h2>

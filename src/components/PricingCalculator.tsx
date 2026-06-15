@@ -25,7 +25,7 @@ const CURRENCIES = ['$','€','£','₱','RM','S$','₹','¥','A$','C$']
 
 let _affOpened = false
 
-export default function PricingCalculator() {
+export default function PricingCalculator({ isPaid = false }: { isPaid?: boolean }) {
   // ── Mode & UI ──────────────────────────────────────────────────
   const [mode, setModeState] = useState<'quick'|'advanced'>('quick')
   const [dark, setDark] = useState(false)
@@ -103,6 +103,14 @@ export default function PricingCalculator() {
     setToast(msg)
     setTimeout(() => setToast(''), 2500)
   }, [])
+
+  // Returns true if the action is allowed; otherwise shows an upgrade toast and blocks.
+  function requirePaid(): boolean {
+    if (isPaid) return true
+    setToast('This is a premium feature — subscribe to unlock it.')
+    setTimeout(() => setToast(''), 2500)
+    return false
+  }
 
   // ── Affiliate link ────────────────────────────────────────────
   const maybeOpenAffiliate = () => {
@@ -575,18 +583,22 @@ export default function PricingCalculator() {
             {mode==='advanced' && (
               <div className="flex flex-wrap gap-2">
                 {[
-                  { label:'Save', onClick: openSaveModal },
-                  ...(activeProduct ? [{ label:'Update', onClick: updateProduct }] : []),
-                  { label:'Reset', onClick: resetAdvanced },
-                  { label:'Import', onClick: () => document.getElementById('import-file')?.click() },
-                  { label:'Export', onClick: exportData, primary: true },
-                ].map(btn => (
-                  <button key={btn.label} onClick={btn.onClick}
-                    className="px-4 py-2 rounded-lg text-xs font-semibold border transition-all"
-                    style={(btn as any).primary ? { background:'var(--accent)', color:'#fff', border:'none' } : { background:'var(--surface)', borderColor:'var(--border2)', color:'var(--text2)' }}>
-                    {btn.label}
-                  </button>
-                ))}
+                  { label:'Save', onClick: openSaveModal, premium: true },
+                  ...(activeProduct ? [{ label:'Update', onClick: updateProduct, premium: true }] : []),
+                  { label:'Reset', onClick: resetAdvanced, premium: false },
+                  { label:'Import', onClick: () => document.getElementById('import-file')?.click(), premium: true },
+                  { label:'Export', onClick: exportData, primary: true, premium: true },
+                ].map(btn => {
+                  const locked = (btn as any).premium && !isPaid
+                  return (
+                    <button key={btn.label} onClick={() => locked ? requirePaid() : btn.onClick()}
+                      title={locked ? 'Premium feature — subscribe to unlock' : ''}
+                      className="px-4 py-2 rounded-lg text-xs font-semibold border transition-all"
+                      style={(btn as any).primary && !locked ? { background:'var(--accent)', color:'#fff', border:'none' } : { background:'var(--surface)', borderColor:'var(--border2)', color: locked ? 'var(--text3)' : 'var(--text2)' }}>
+                      {locked ? '🔒 ' : ''}{btn.label}
+                    </button>
+                  )
+                })}
                 <input type="file" id="import-file" accept=".xlsx,.xls" className="hidden" onChange={e => { if(e.target.files?.[0]) importData(e.target.files[0]); e.target.value='' }} />
               </div>
             )}
@@ -597,8 +609,8 @@ export default function PricingCalculator() {
             <div className="max-w-xl mx-auto">
               {/* Quick actions */}
               <div className="flex gap-2 mb-4 flex-wrap">
-                <Btn onClick={saveQuick}>💾 Save</Btn>
-                {activeQuick && <Btn onClick={() => {
+                <Btn onClick={() => requirePaid() && saveQuick()}>{isPaid ? '💾 Save' : '🔒 Save'}</Btn>
+                {activeQuick && isPaid && <Btn onClick={() => {
                   const s = quickSaved; const n2 = qName.trim()||activeQuick
                   const entry = { name:n2, cogs:qCogs, platform:qPlatform, affiliate:qAffiliate, tax:qTax, price:qPrice, target:qTarget, currency, savedAt:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) }
                   const next = {...s}; if(n2!==activeQuick) delete next[activeQuick]; next[n2]=entry
@@ -885,7 +897,7 @@ export default function PricingCalculator() {
                   </Section>
 
                   {/* Profit Goal */}
-                  <Section icon="💰" title="Profit Goal Calculator" id="sec-goal" collapsed={!isOpen('sec-goal')} onToggle={() => toggleSection('sec-goal')}>
+                  <Section icon="💰" title="Profit Goal Calculator" id="sec-goal" collapsed={!isOpen('sec-goal')} onToggle={() => toggleSection('sec-goal')} locked={!isPaid}>
                     <p className="text-sm mb-5" style={{ color:'var(--text2)' }}>Set a monthly profit target — see exactly how many units to sell or what price to charge.</p>
                     <Field label="I want to earn per month" hint="your profit goal">
                       <PrefixInput prefix={currency} value={goalProfit} onChange={v => setGoalProfit(v)} placeholder="e.g. 50,000" dark={dark} />
@@ -918,7 +930,7 @@ export default function PricingCalculator() {
                   </Section>
 
                   {/* Voucher simulator */}
-                  <Section icon="🏷️" title="Sale / Voucher Simulator" id="sec-voucher" collapsed={!isOpen('sec-voucher')} onToggle={() => toggleSection('sec-voucher')}>
+                  <Section icon="🏷️" title="Sale / Voucher Simulator" id="sec-voucher" collapsed={!isOpen('sec-voucher')} onToggle={() => toggleSection('sec-voucher')} locked={!isPaid}>
                     <p className="text-sm mb-5" style={{ color:'var(--text2)' }}>Simulate a sale or voucher discount — see the impact on your profit before you run it.</p>
                     <div className="flex flex-wrap gap-3 mb-5 items-end">
                       <Field label="Discount value">
@@ -974,7 +986,7 @@ export default function PricingCalculator() {
                   </Section>
 
                   {/* Ads simulator */}
-                  <Section icon="📣" title="Ads Simulator" id="sec-ads" collapsed={!isOpen('sec-ads')} onToggle={() => toggleSection('sec-ads')}>
+                  <Section icon="📣" title="Ads Simulator" id="sec-ads" collapsed={!isOpen('sec-ads')} onToggle={() => toggleSection('sec-ads')} locked={!isPaid}>
                     <p className="text-sm mb-5" style={{ color:'var(--text2)' }}>Simulate an ad campaign — enter your budget, CPC, and conversion rate to see clicks, orders, ROAS, and profit impact.</p>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
                       <Field label="Ad budget" hint="this campaign"><PrefixInput prefix={currency} value={adsBudget} onChange={setAdsBudget} placeholder="e.g. 5000" dark={dark} /></Field>
@@ -1022,7 +1034,7 @@ export default function PricingCalculator() {
                   </Section>
 
                   {/* Price comparison */}
-                  <Section icon="📊" title="Price Comparison Table" id="sec-pricetable" collapsed={!isOpen('sec-pricetable')} onToggle={() => toggleSection('sec-pricetable')}>
+                  <Section icon="📊" title="Price Comparison Table" id="sec-pricetable" collapsed={!isOpen('sec-pricetable')} onToggle={() => toggleSection('sec-pricetable')} locked={!isPaid}>
                     <div className="flex flex-wrap items-center gap-3 mb-4 pb-4 border-b" style={{ borderColor:'var(--border)' }}>
                       <span className="text-xs font-medium" style={{ color:'var(--text2)' }}>Compare prices:</span>
                       <div className="flex flex-wrap gap-2">
@@ -1256,9 +1268,9 @@ export default function PricingCalculator() {
 
 // ── Sub-components ──────────────────────────────────────────────────
 
-function Section({ icon, title, id, children, collapsed, onToggle, collapsible=true }: {
+function Section({ icon, title, id, children, collapsed, onToggle, collapsible=true, locked=false }: {
   icon: string; title: string; id?: string; children: React.ReactNode
-  collapsed?: boolean; onToggle?: () => void; collapsible?: boolean
+  collapsed?: boolean; onToggle?: () => void; collapsible?: boolean; locked?: boolean
 }) {
   return (
     <div className="rounded-2xl border overflow-hidden mb-4" style={{ background:'var(--surface)', borderColor:'var(--border)', boxShadow:'0 2px 8px rgba(59,97,198,0.06)' }}>
@@ -1266,6 +1278,7 @@ function Section({ icon, title, id, children, collapsed, onToggle, collapsible=t
         <button onClick={onToggle} className="w-full flex items-center gap-3 px-6 py-3.5 border-b text-left" style={{ background:'var(--surface2)', borderColor:'var(--border)' }}>
           <div className="w-8 h-8 rounded-lg flex items-center justify-center text-base flex-shrink-0" style={{ background:'rgba(59,97,198,0.08)' }}>{icon}</div>
           <span className="text-xs font-bold uppercase tracking-widest flex-1" style={{ color:'var(--text)' }}>{title}</span>
+          {locked && <span className="text-xs font-semibold px-2 py-0.5 rounded-full mr-2" style={{ background:'rgba(245,166,35,0.15)', color:'var(--yellow)' }}>🔒 Premium</span>}
           <span style={{ color:'var(--text3)', transform: collapsed?'rotate(-90deg)':'rotate(0)', display:'inline-block', transition:'transform .25s' }}>▼</span>
         </button>
       ) : (
@@ -1274,7 +1287,24 @@ function Section({ icon, title, id, children, collapsed, onToggle, collapsible=t
           <span className="text-xs font-bold uppercase tracking-widest" style={{ color:'var(--text)' }}>{title}</span>
         </div>
       )}
-      {(!collapsible || !collapsed) && <div className="p-6">{children}</div>}
+      {(!collapsible || !collapsed) && (
+        <div className="p-6">{locked ? <LockedFeature /> : children}</div>
+      )}
+    </div>
+  )
+}
+
+function LockedFeature() {
+  return (
+    <div className="flex flex-col items-center text-center py-8 px-4">
+      <div className="text-3xl mb-3">🔒</div>
+      <h4 className="text-base font-semibold mb-1" style={{ color:'var(--text)' }}>Premium feature</h4>
+      <p className="text-sm mb-5 max-w-xs" style={{ color:'var(--text2)' }}>
+        This tool is available on a paid subscription. Subscribe to unlock it and all premium features.
+      </p>
+      <a href="/subscribe" className="px-5 py-2 rounded-lg text-sm font-semibold text-white" style={{ background:'var(--accent)' }}>
+        Subscribe to unlock
+      </a>
     </div>
   )
 }
