@@ -26,20 +26,30 @@ export default function RegisterPage() {
 
     setLoading(true)
 
-    const supabase = createClient()
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { full_name: fullName } },
+    const res = await fetch('/api/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password, fullName }),
     })
+    const json = await res.json()
 
-    if (error) {
-      setError(error.message)
+    if (!res.ok) {
+      setError(json.error || 'Something went wrong.')
       setLoading(false)
-    } else {
-      router.push('/app')
-      router.refresh()
+      return
     }
+
+    // Sign in on the client so the session cookie is set in the browser
+    const supabase = createClient()
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
+    if (signInError) {
+      setError(signInError.message)
+      setLoading(false)
+      return
+    }
+
+    router.push('/app')
+    router.refresh()
   }
 
   return (
