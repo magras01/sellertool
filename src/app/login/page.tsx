@@ -80,10 +80,18 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <p className="mt-4 text-sm text-center text-gray-600">
-          No account?{' '}
-          <Link href="/register" className="text-blue-600 hover:underline">Start free trial</Link>
-        </p>
+        <div className="mt-4 flex items-center gap-3">
+          <div className="flex-1 h-px bg-gray-200" />
+          <span className="text-xs text-gray-400">or</span>
+          <div className="flex-1 h-px bg-gray-200" />
+        </div>
+
+        <Link
+          href="/register"
+          className="mt-4 block w-full py-2 text-center bg-white border border-blue-600 text-blue-600 rounded-lg text-sm font-medium hover:bg-blue-50"
+        >
+          Start Free Trial
+        </Link>
       </div>
     </main>
   )
