@@ -667,7 +667,7 @@ export default function PricingCalculator() {
                 )}
 
                 {/* Quick results */}
-                <div className="grid grid-cols-3 gap-3 mt-6">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-6">
                   <KpiCard label="Profit per item" value={f(qr.profit)} sub="net after all fees" color={qr.profit>0?'var(--green)':qr.profit<0?'var(--red)':'var(--text3)'} accent={qr.profit>0?'green':qr.profit<0?'red':'yellow'} large />
                   <KpiCard label="Profit margin" value={(qr.margin*100).toFixed(1)+'%'} sub="of selling price" color={qr.margin>=0.2?'var(--green)':qr.margin<0?'var(--red)':'var(--yellow)'} accent={qr.margin>=0.2?'green':qr.margin<0?'red':'yellow'} />
                   <KpiCard label="You receive" value={f(qr.payout)} sub="payout after fees" color="var(--accent)" accent="blue" />
@@ -1465,7 +1465,7 @@ function KpiCard({ label, value, sub, color, accent, large, helpId, helpLang }: 
       <div className="absolute top-0 left-0 right-0 h-0.5 rounded-t-2xl opacity-60"
         style={{ background: accent==='green'?'var(--green)':accent==='red'?'var(--red)':accent==='yellow'?'var(--yellow)':'var(--accent)' }} />
       <div className="text-xs font-bold uppercase tracking-widest mb-2.5" style={{ color:'var(--text3)' }}>{label}</div>
-      <div className={`mono font-semibold leading-tight ${large?'text-3xl':'text-2xl'}`} style={{ color }}>{value}</div>
+      <div className={`mono font-semibold leading-tight break-all ${large?'text-2xl sm:text-3xl':'text-xl sm:text-2xl'}`} style={{ color }}>{value}</div>
       {sub && <div className="text-xs mt-1.5" style={{ color:'var(--text3)' }}>{sub}</div>}
       {helpId && helpLang && <HelpBox id={helpId} lang={helpLang} />}
     </div>
