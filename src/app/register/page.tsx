@@ -10,14 +10,21 @@ export default function RegisterPage() {
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setLoading(true)
     setError('')
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.')
+      return
+    }
+
+    setLoading(true)
 
     const supabase = createClient()
     const { error } = await supabase.auth.signUp({
@@ -88,6 +95,20 @@ export default function RegisterPage() {
               </button>
             </div>
           </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Confirm password</label>
+            <input
+              type={showPassword ? 'text' : 'password'}
+              required
+              minLength={6}
+              value={confirmPassword}
+              onChange={e => setConfirmPassword(e.target.value)}
+              className={`w-full px-3 py-2 border rounded-lg text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 ${confirmPassword && password !== confirmPassword ? 'border-red-400 focus:ring-red-400' : 'border-gray-300 focus:ring-blue-500'}`}
+            />
+            {confirmPassword && password !== confirmPassword && (
+              <p className="mt-1 text-xs text-red-600">Passwords do not match.</p>
+            )}
+          </div>
           <button
             type="submit"
             disabled={loading}
@@ -97,10 +118,18 @@ export default function RegisterPage() {
           </button>
         </form>
 
-        <p className="mt-4 text-sm text-center text-gray-600">
-          Already have an account?{' '}
-          <Link href="/login" className="text-blue-600 hover:underline">Log in</Link>
-        </p>
+        <div className="mt-4 flex items-center gap-3">
+          <div className="flex-1 h-px bg-gray-200" />
+          <span className="text-xs text-gray-400">or</span>
+          <div className="flex-1 h-px bg-gray-200" />
+        </div>
+
+        <Link
+          href="/login"
+          className="mt-4 block w-full py-2 text-center bg-white border border-blue-600 text-blue-600 rounded-lg text-sm font-medium hover:bg-blue-50"
+        >
+          Log in
+        </Link>
       </div>
     </main>
   )
