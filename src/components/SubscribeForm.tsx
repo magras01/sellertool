@@ -17,6 +17,14 @@ export default function SubscribeForm({ plans, settings, userId }: Props) {
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState('')
+  const [copied, setCopied] = useState(false)
+
+  function copyNumber() {
+    if (!settings.gcash_number) return
+    navigator.clipboard.writeText(settings.gcash_number)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -111,7 +119,18 @@ export default function SubscribeForm({ plans, settings, userId }: Props) {
             <p>1. Open your GCash app</p>
             <p>2. Scan the QR code or send to:</p>
             {settings.gcash_name && <p className="font-semibold pl-4">Name: {settings.gcash_name}</p>}
-            {settings.gcash_number && <p className="font-semibold pl-4">Number: {settings.gcash_number}</p>}
+            {settings.gcash_number && (
+              <div className="flex items-center gap-2 pl-4">
+                <span className="font-semibold">Number: {settings.gcash_number}</span>
+                <button
+                  type="button"
+                  onClick={copyNumber}
+                  className={`px-2.5 py-1 rounded-md text-xs font-medium border transition-colors ${copied ? 'bg-green-50 border-green-300 text-green-700' : 'bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100'}`}
+                >
+                  {copied ? '✓ Copied' : 'Copy'}
+                </button>
+              </div>
+            )}
             {selectedPlan && <p className="font-semibold pl-4">Amount: ₱{selectedPlan.price.toFixed(2)}</p>}
             <p>3. Take a screenshot of the receipt</p>
             <p>4. Fill out the form below and upload the screenshot</p>
