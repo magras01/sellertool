@@ -1340,6 +1340,7 @@ function Input({ value, onChange, placeholder, dark, comma }: { value: string; o
     <input
       value={comma ? formatComma(value) : value}
       onChange={e => comma ? handleCommaChange(e.target.value, onChange) : onChange(e.target.value)}
+      onFocus={e => e.target.select()}
       placeholder={placeholder}
       className="w-full px-3 py-2 rounded-lg border text-sm outline-none"
       style={{ background:'var(--surface2)', borderColor:'var(--border2)', color:'var(--text)' }} />
@@ -1354,6 +1355,7 @@ function PrefixInput({ prefix, value, onChange, placeholder, dark }: { prefix: s
       <input
         value={formatComma(strVal)}
         onChange={e => handleCommaChange(e.target.value, onChange)}
+        onFocus={e => e.target.select()}
         placeholder={placeholder||'0'}
         className="w-full pl-8 pr-3 py-2 rounded-lg border text-sm mono outline-none"
         style={{ background:'var(--surface2)', borderColor:'var(--border2)', color:'var(--text)' }} />
@@ -1364,7 +1366,7 @@ function PrefixInput({ prefix, value, onChange, placeholder, dark }: { prefix: s
 function SuffixInput({ suffix, value, onChange, dark, min, max }: { suffix: string; value: string|number; onChange: (v:string)=>void; dark: boolean; min?: number; max?: number }) {
   return (
     <div className="relative">
-      <input type="number" value={value} onChange={e=>onChange(e.target.value)} min={min} max={max}
+      <input type="number" value={value} onChange={e=>onChange(e.target.value)} onFocus={e=>e.target.select()} min={min} max={max}
         className="w-full pl-3 pr-10 py-2 rounded-lg border text-sm mono outline-none"
         style={{ background:'var(--surface2)', borderColor:'var(--border2)', color:'var(--text)' }} />
       <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs mono pointer-events-none" style={{ color:'var(--text3)' }}>{suffix}</span>
