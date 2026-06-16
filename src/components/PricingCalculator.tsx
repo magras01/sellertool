@@ -781,16 +781,16 @@ export default function PricingCalculator({ isPaid = false }: { isPaid?: boolean
                       {additionals.map(a => (
                         <div key={a.id} className="flex items-center gap-2">
                           <input value={a.name} onChange={e=>updateAdditional(a.id,'name',e.target.value)}
-                            placeholder="e.g. Shipping label, Insert card"
-                            className="flex-1 px-3 py-2 rounded-lg border text-sm outline-none"
+                            placeholder="e.g. Shipping label"
+                            className="flex-1 min-w-0 px-3 py-2 rounded-lg border text-sm outline-none"
                             style={{ background:'var(--surface2)', borderColor:'var(--border2)', color:'var(--text)' }} />
-                          <div className="relative w-28 flex-shrink-0">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs mono" style={{ color:'var(--text3)' }}>{currency}</span>
+                          <div className="relative w-24 flex-shrink-0">
+                            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-xs mono pointer-events-none" style={{ color:'var(--text3)' }}>{currency}</span>
                             <input type="number" value={a.cost||''} onChange={e=>updateAdditional(a.id,'cost',parseFloat(e.target.value)||0)}
                               placeholder="0" className="w-full pl-7 pr-2 py-2 rounded-lg border text-sm outline-none mono"
                               style={{ background:'var(--surface2)', borderColor:'var(--border2)', color:'var(--text)' }} />
                           </div>
-                          <button onClick={() => removeAdditional(a.id)} className="w-7 h-7 flex items-center justify-center rounded-lg border text-xs" style={{ background:'rgba(232,64,64,0.08)', borderColor:'rgba(232,64,64,0.2)', color:'var(--red)' }}>✕</button>
+                          <button onClick={() => removeAdditional(a.id)} className="w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-lg border text-xs" style={{ background:'rgba(232,64,64,0.08)', borderColor:'rgba(232,64,64,0.2)', color:'var(--red)' }}>✕</button>
                         </div>
                       ))}
                     </div>
@@ -803,7 +803,7 @@ export default function PricingCalculator({ isPaid = false }: { isPaid?: boolean
 
                   {/* Fees */}
                   <Section icon="💸" title="Platform & Fees" id="sec-fees" collapsed={!isOpen('sec-fees')} onToggle={() => { toggleSection('sec-fees'); maybeOpenAffiliate() }}>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <Field label="Platform fee" hint="TikTok ~8%, Shopee ~25%">
                         <SuffixInput suffix="%" value={platform} onChange={v=>setPlatform(Number(v))} dark={dark} />
                         <HelpBox id="platform" lang={helpLang} />
